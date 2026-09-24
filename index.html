@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apni Dukaan - Online General Store</title>
+    <!-- Meta tags for Google SEO -->
+    <meta name="description" content="Apni Dukaan par ghar ka saara saman jaise chawal, chini, tel aur kirana online order karein aur seedha apne server par payein.">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e67e22;
+            --secondary: #2c3e50;
+            --light: #f8f9fa;
+            --dark: #333;
+            --success: #27ae60;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light); color: var(--dark); overflow-x: hidden; }
+
+        nav { background-color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.8em; font-weight: bold; color: var(--primary); text-decoration: none; }
+        .cart-icon { position: relative; font-size: 1.5em; cursor: pointer; color: var(--secondary); }
+        .cart-count { position: absolute; top: -8px; right: -8px; background: var(--primary); color: white; font-size: 0.6em; padding: 2px 6px; border-radius: 50%; font-weight: bold; }
+
+        .hero { background: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200') center/cover; color: white; text-align: center; padding: 80px 20px; }
+        .hero h1 { font-size: 3em; margin-bottom: 10px; }
+        .hero p { font-size: 1.2em; margin-bottom: 20px; color: #ecf0f1; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .section-title { text-align: center; margin-bottom: 30px; font-size: 2em; color: var(--secondary); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 180px; object-fit: cover; }
+        .product-info { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 1.2em; font-weight: 600; margin-bottom: 5px; }
+        .product-desc { font-size: 0.85em; color: #666; margin-bottom: 15px; flex-grow: 1; }
+        .product-price { color: var(--success); font-size: 1.3em; font-weight: bold; margin-bottom: 15px; }
+        .add-to-cart-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: bold; transition: 0.2s; }
+        .add-to-cart-btn:hover { background: #d35400; }
+
+        .cart-sidebar { position: fixed; top: 0; right: -400px; width: 380px; max-width: 100%; height: 100vh; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.4s; z-index: 1000; display: flex; flex-direction: column; }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 20px; background: var(--secondary); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .close-cart { background: none; border: none; color: white; font-size: 1.5em; cursor: pointer; }
+        .cart-items { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .cart-total { padding: 20px; border-top: 1px solid #eee; font-size: 1.3em; font-weight: bold; text-align: right; }
+        .checkout-btn { background: var(--success); color: white; border: none; width: 100%; padding: 15px; font-size: 1.1em; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .checkout-btn:hover { background: #219a52; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .checkout-modal { background: white; width: 90%; max-width: 500px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { background: var(--secondary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; }
+        .close-modal { cursor: pointer; }
+        .checkout-form { padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; box-sizing: border-box; }
+        .form-group textarea { resize: vertical; height: 80px; }
+        .submit-order-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: white; padding: 12px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 3000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" class="logo">🛒 Apni Dukaan</a>
+        <div class="cart-icon" onclick="toggleCart()">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cart-count">0</span>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Ghar Baithe Order Karein!</h1>
+        <p>Aapka har zaruri kirane ka saman, sidha aapke darwaze tak.</p>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Hamare Products & Detailing</h2>
+        <div class="product-grid" id="product-grid"></div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Aapka Jhola (Cart)</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-total">
+            Total: ₹<span id="cart-total-price">0</span>
+        </div>
+        <button class="checkout-btn" onclick="openCheckout()">Checkout Karein <i class="fas fa-arrow-right"></i></button>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal-overlay" id="checkout-modal-overlay">
+        <div class="checkout-modal">
+            <div class="modal-header">
+                <span>Customer Delivery Details</span>
+                <span class="close-modal" onclick="closeCheckout()">&times;</span>
+            </div>
+            <form class="checkout-form" id="checkout-form">
+                <div class="form-group">
+                    <label>Pura Naam (Full Name)</label>
+                    <input type="text" id="cust-name" required placeholder="Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="cust-phone" required placeholder="9876543210">
+                </div>
+                <div class="form-group">
+                    <label>Delivery Pata (Address)</label>
+                    <textarea id="cust-address" required placeholder="House No, Street, Landmark..."></textarea>
+                </div>
+                <button type="submit" class="submit-order-btn">Server Par Order Bhejein</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Item added!</div>
+
+    <script>
+        const products = [
+            { id: 1, name: "Basmati Chawal (5kg)", price: 450, desc: "Long Grain, 100% Sortex Cleaned. Roz ke khane ke liye best.", img: "https://images.unsplash.com/photo-1627485937980-221c88ce04ea?auto=format&fit=crop&w=300" },
+            { id: 2, name: "Safed Chini (1kg)", price: 45, desc: "Refined Crystal Sugar, Sulphur Free. Chai aur mithai ke liye.", img: "https://images.unsplash.com/photo-1577905872895-c1fc349942a7?auto=format&fit=crop&w=300" },
+            { id: 3, name: "Sarso Tel (1 Ltr)", price: 140, desc: "Cold Pressed Mustard Oil. Shuddh aur swadisht.", img: "https://images.unsplash.com/photo-1600180766436-0c9f13000b0e?auto=format&fit=crop&w=300" },
+            { id: 4, name: "Nahane Ka Sabun (4 Pack)", price: 120, desc: "All skin types fresh soap. Gulaab aur chandan khushboo.", img: "https://images.unsplash.com/photo-1584852959146-86c359d99dce?auto=format&fit=crop&w=300" },
+            { id: 5, name: "Shuddh Desi Ghee (1 Ltr)", price: 550, desc: "Pure cow ghee, authentic taste aur khushboo.", img: "https://images.unsplash.com/photo-1644324203102-14073e512fc9?auto=format&fit=crop&w=300" },
+            { id: 6, name: "Aashirvaad Atta (5kg)", price: 220, desc: "Chakki fresh wheat atta for soft rotis.", img: "https://images.unsplash.com/photo-1573333515743-56e546174996?auto=format&fit=crop&w=300" }
+        ];
+
+        let cart = [];
+
+        const grid = document.getElementById('product-grid');
+        products.forEach(p => {
+            grid.innerHTML += `
+                <div class="product-card">
+                    <img src="${p.img}" class="product-img" alt="${p.name}">
+                    <div class="product-info">
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-desc">${p.desc}</div>
+                        <div class="product-price">₹${p.price}</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">
+                            <i class="fas fa-plus"></i> Jhole Mein Dalein
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        function addToCart(id, name, price) {
+            let item = cart.find(i => i.id === id);
+            if (item) { item.qty++; } else { cart.push({ id, name, price, qty: 1 }); }
+            updateCart();
+            showToast("Saman jhole mein daal diya gaya!");
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            const count = document.getElementById('cart-count');
+            const totalDisplay = document.getElementById('cart-total-price');
+            
+            cartItemsDiv.innerHTML = '';
+            let total = 0, totalQty = 0;
+
+            cart.forEach(item => {
+                let itemTotal = item.price * item.qty;
+                total += itemTotal;
+                totalQty += item.qty;
+                
+                cartItemsDiv.innerHTML += `
+                    <div class="cart-item">
+                        <div><strong>${item.name}</strong><br><small>₹${item.price} x ${item.qty}</small></div>
+                        <div><strong>₹${itemTotal}</strong> <button onclick="removeFromCart(${item.id})" style="color:red; background:none; border:none; margin-left:8px; cursor:pointer;"><i class="fas fa-trash"></i></button></div>
+                    </div>
+                `;
+            });
+
+            if(cart.length === 0) { cartItemsDiv.innerHTML = '<p style="text-align:center; margin-top:20px; color:#7f8c8d;">Aapka jhola khali hai.</p>'; }
+            count.innerText = totalQty;
+            totalDisplay.innerText = total;
+        }
+
+        function toggleCart() { document.getElementById('cart-sidebar').classList.toggle('open'); }
+        function openCheckout() {
+            if(cart.length === 0) { showToast("Phele saman to daliye!"); return; }
+            document.getElementById('cart-sidebar').classList.remove('open');
+            document.getElementById('checkout-modal-overlay').classList.add('active');
+        }
+        function closeCheckout() { document.getElementById('checkout-modal-overlay').classList.remove('active'); }
+
+        // Send Order Directly to Server API
+        document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            let totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            const orderData = {
+                customerName: document.getElementById('cust-name').value,
+                phone: document.getElementById('cust-phone').value,
+                address: document.getElementById('cust-address').value,
+                items: cart,
+                total: totalAmount
+            };
+
+            try {
+                // Aapke Node.js server ka URL (Production par live URL aayega)
+                const response = await fetch('http://localhost:5000/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                if(response.ok) {
+                    alert("Aapka order successfully server par save ho gaya hai!");
+                    cart = [];
+                    updateCart();
+                    closeCheckout();
+                    document.getElementById('checkout-form').reset();
+                } else {
+                    alert("Server par order save hone mein dikkat aayi.");
+                }
+            } catch (err) {
+                alert("Server connected nahi hai. Kripya apna backend server check karein.");
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
